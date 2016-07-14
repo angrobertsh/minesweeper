@@ -1,5 +1,6 @@
 require_relative 'Board'
 require_relative 'Tile'
+require 'yaml'
 
 class Game
 
@@ -70,19 +71,53 @@ class Game
   end
 
   def play
-    populate
+    load_file
     system("clear")
-    render
     until won? || @lose
+      render
       position = get_pos
       option = get_option
       flip(position) if option == "flip"
       flag(position) if option == "flag"
       system("clear")
       render
+      break if @lose
+      save_file
+      system("clear")
     end
     puts "You lose" if @lose
     puts "You win!" if won?
+  end
+
+  def save_file
+    puts "Do you want to save your game?"
+    input = gets.chomp.downcase
+    if input == "y"
+      saved = @board.to_yaml
+      puts "Enter a filename"
+      filename = gets.chomp + ".yaml"
+      File.open(filename , 'w') do |line|
+        line.puts saved
+      end
+    end
+  end
+
+  def load_file
+    puts "Do you want to load a board?"
+    input = gets.chomp.downcase
+    if input == "y"
+      puts "In what yaml file is your save?"
+      file_name = gets.chomp
+      serialized_board = ""
+      File.open(file_name, 'r') do |f1|
+        while line = f1.gets
+          serialized_board += line
+        end
+      end
+      @board = YAML::load(serialized_board)
+    else
+      populate
+    end
   end
 
   def get_pos
