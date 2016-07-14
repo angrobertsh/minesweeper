@@ -6,12 +6,12 @@ class Game
   attr_reader :board, :lose
 
   def initialize()
-    @board = Board.new.grid
+    @board = Board.new(10).grid
     @lose = false
   end
 
   def populate
-    place_bombs(9)
+    place_bombs(rand(@board.size*@board.size))
     place_nums
   end
 
@@ -28,8 +28,7 @@ class Game
   end
 
   def calc_nums(pos)
-    r = pos[0]
-    c = pos[1]
+    r, c = pos
     count = 0
     (-1..1).each do |row|
       (-1..1).each do |col|
@@ -62,11 +61,7 @@ class Game
         elsif el.state == ""
           print "* "
         else
-#          if el.nil?
-#            print "nil "
-#          else
             print "#{el.value} "
-#          end
         end
       end
       puts
@@ -76,19 +71,38 @@ class Game
 
   def play
     populate
+    system("clear")
     render
     until won? || @lose
-      puts "What coordinate do you want?(a,b)"
-      position = (gets.chomp).split(",").map(&:to_i)
-      puts "Do you want to flip or flag?"
-      option = gets.chomp.downcase
+      position = get_pos
+      option = get_option
       flip(position) if option == "flip"
       flag(position) if option == "flag"
+      system("clear")
       render
     end
     puts "You lose" if @lose
     puts "You win!" if won?
+  end
 
+  def get_pos
+    puts "What coordinate do you want?(a,b)"
+    position = gets.chomp.split(",").map(&:to_i)
+    until position[0] < @board.size && position[1] < @board.size && position.length==2
+      puts "Please enter the coordinates as (a,b)"
+      position = (gets.chomp).split(",").map(&:to_i)
+    end
+    position
+  end
+
+  def get_option
+    puts "Do you want to flip or flag?"
+    option = gets.chomp.downcase
+    until option=="flag" || option=="flip"
+      puts "Please enter 'flag' or 'flip'"
+      option = gets.chomp.downcase
+    end
+    option
   end
 
   def flip(pos)
@@ -97,10 +111,10 @@ class Game
   end
 
   def flag(pos)
-    @board[pos[0]][pos[1]].flag
+    target = @board[pos[0]][pos[1]]
+    target.flag unless target.state == "flipped"
   end
 
-  
 
   def won?
     count = 0
