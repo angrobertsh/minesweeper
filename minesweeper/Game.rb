@@ -100,6 +100,7 @@ class Game
     @board[pos[0]][pos[1]].flag
   end
 
+  
 
   def won?
     count = 0
