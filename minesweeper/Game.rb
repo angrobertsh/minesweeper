@@ -1,6 +1,7 @@
 require_relative 'Board'
 require_relative 'Tile'
 require 'yaml'
+require 'colorized_string'
 
 class Game
 
@@ -58,11 +59,12 @@ class Game
     @board.each do |row|
       row.each do |el|
         if el.state == "flagged"
-          print "F "
+          print ColorizedString["F "].colorize(:orange)
         elsif el.state == ""
-          print "* "
+          print ColorizedString["* "].colorize(:yellow)
         else
-            print "#{el.value} "
+            print ColorizedString["#{el.value} "].colorize(:red) if el.value == "B"
+            print ColorizedString["#{el.value} "].colorize(:green) unless el.value == "B"
         end
       end
       puts
@@ -158,6 +160,8 @@ class Game
     return true if count == total
     false
   end
+
+
 
 end
 
